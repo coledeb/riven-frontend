@@ -17,7 +17,7 @@
         icons,
         // Backend can set sjsf UI options per field (e.g. addable/removable) via "x-ui-options".
         extraUiOptions: (option, config) =>
-            (config.schema as { "x-ui-options"?: Record<string, unknown> } | undefined)?.["x-ui-options"]?.[
+            (config?.schema as { "x-ui-options"?: Record<string, unknown> } | undefined)?.["x-ui-options"]?.[
                 option
             ] as never,
         delayedMs: 500,

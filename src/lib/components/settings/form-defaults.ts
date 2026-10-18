@@ -6,7 +6,10 @@ import "@sjsf/form/fields/extra/enum-include";
 import "@sjsf/form/fields/extra/multi-enum-include";
 import "@sjsf/form/fields/extra/unknown-native-file-include";
 
-export { theme } from "@sjsf/shadcn4-theme";
+import { theme as shadcnTheme } from "@sjsf/shadcn4-theme";
+import { overrideByRecord } from "@sjsf/form/lib/resolver";
+import SettingsDescription from "./settings-description.svelte";
+export const theme = overrideByRecord(shadcnTheme, { description: SettingsDescription });
 import "@sjsf/shadcn4-theme/extra-widgets/textarea-include";
 import "@sjsf/shadcn4-theme/extra-widgets/checkboxes-include";
 import "@sjsf/shadcn4-theme/extra-widgets/radio-include";
