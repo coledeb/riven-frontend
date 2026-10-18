@@ -1,6 +1,7 @@
 export { translation } from "@sjsf/form/translations/en";
 
-export { resolver } from "@sjsf/form/resolvers/basic";
+// compat (not basic) so enum fields render as dropdowns and enum arrays as checkboxes.
+export { resolver } from "@sjsf/form/resolvers/compat";
 import "@sjsf/form/fields/extra/enum-include";
 import "@sjsf/form/fields/extra/multi-enum-include";
 import "@sjsf/form/fields/extra/unknown-native-file-include";
