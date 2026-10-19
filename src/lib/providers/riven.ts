@@ -559,6 +559,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/items/{item_id}/blacklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Media Item Blacklist
+         * @description Torrents currently blacklisted for an item, with why and until when. For a show or season this includes its episodes.
+         */
+        get: operations["get_item_blacklist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/items/{item_id}/streams/{stream_id}/blacklist": {
         parameters: {
             query?: never;
@@ -2980,6 +3000,28 @@ export interface components {
             activity_timeout_seconds: number;
         };
         /** StreamsResponse */
+        /** BlacklistEntry */
+        BlacklistEntry: {
+            /** @description The movie or episode the torrent is blacklisted for */
+            item_id: number;
+            /** @description e.g. S01E02 for an episode, else the title */
+            item_label: string;
+            stream_id: number;
+            infohash: string;
+            raw_title: string;
+            resolution: string | null;
+            /** @description Why it was blacklisted (unknown for old entries) */
+            reason: string;
+            blacklisted_at: string | null;
+            /** @description None = permanent */
+            expires_at: string | null;
+            /** @description Times blacklisted for this item */
+            strikes: number;
+        };
+        /** BlacklistResponse */
+        BlacklistResponse: {
+            entries: components["schemas"]["BlacklistEntry"][];
+        };
         StreamsResponse: {
             /** Message */
             message: string;
@@ -4479,6 +4521,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StreamsResponse"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_item_blacklist: {
+        parameters: {
+            query?: {
+                api_key?: string | null;
+            };
+            header?: never;
+            path: {
+                /** @description The ID of the media item */
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlacklistResponse"];
                 };
             };
             /** @description Not found */
