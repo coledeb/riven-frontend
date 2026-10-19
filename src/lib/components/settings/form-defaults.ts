@@ -13,11 +13,15 @@ export const translation = overrideByRecord(en, {
     "key-input-title": ({ name }) => `${name} id`
 });
 import SettingsDescription from "./settings-description.svelte";
+import SecretWidget from "./secret-widget.svelte";
 import "@sjsf/shadcn4-theme/extra-widgets/switch-include";
 const settingsTheme = overrideByRecord(shadcnTheme, { description: SettingsDescription });
 // Booleans render as switches (checkboxes read as a list item, not an on/off setting).
+// Secrets use SecretWidget (masked + reveal button) via `"ui:components": { textWidget: "secretWidget" }`.
 export const theme = ((type: Parameters<typeof shadcnTheme>[0], config: Parameters<typeof shadcnTheme>[1]) =>
-    settingsTheme(type === "checkboxWidget" ? "switchWidget" : type, config)) as typeof shadcnTheme;
+    (type as string) === "secretWidget"
+        ? SecretWidget
+        : settingsTheme(type === "checkboxWidget" ? "switchWidget" : type, config)) as typeof shadcnTheme;
 import "@sjsf/shadcn4-theme/extra-widgets/textarea-include";
 import "@sjsf/shadcn4-theme/extra-widgets/checkboxes-include";
 import "@sjsf/shadcn4-theme/extra-widgets/radio-include";

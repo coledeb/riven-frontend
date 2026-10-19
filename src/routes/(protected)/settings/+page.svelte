@@ -40,10 +40,10 @@
     type UiNode = Record<string, unknown> & { "ui:options"?: Record<string, unknown> };
 
     // Per-field UI tweaks driven by markers prepareSettingsSchema adds to the schema:
-    // secrets (`format: "password"`) render as password inputs; language lists stay lists of
+    // secrets (`format: "password"`) use the masked SecretWidget; language lists stay lists of
     // dropdowns (sjsf would otherwise turn a unique list of choices into a checkbox grid).
     function fieldUi(prop: Schema & { format?: string; "x-language-list"?: boolean }): UiNode {
-        if (prop.format === "password") return { "ui:options": { shadcn4Text: { type: "password", autocomplete: "off" } } };
+        if (prop.format === "password") return { "ui:components": { textWidget: "secretWidget" } };
         if (prop["x-language-list"]) return { "ui:components": { multiEnumField: "arrayField" } };
         const node: UiNode = {};
         for (const [key, child] of Object.entries(prop.properties ?? {})) {
@@ -390,9 +390,34 @@
         display: none;
     }
 
-    /* A disabled service collapses to its title, description and Enabled switch. */
+    /* A disabled service (Enabled off) or a custom rank that isn't fetched (Fetch off) collapses to
+       its title, description and that switch. */
     .settings-form
-        :global(fieldset:has(> [data-layout="object-properties"] > [data-layout="object-property"] > [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"][aria-checked="false"]) > [data-layout="object-properties"] > [data-layout="object-property"]:not(:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]))) {
+        :global(fieldset:has(> [data-layout="object-properties"] > [data-layout="object-property"] > [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"]:is([id$=".enabled"], [id$=".fetch"])[aria-checked="false"]) > [data-layout="object-properties"] > [data-layout="object-property"]:not(:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"]:is([id$=".enabled"], [id$=".fetch"])))) {
         display: none;
+    }
+
+    /* A card's Enabled switch sits on the title line instead of its own row. */
+    .settings-form :global([data-section] fieldset fieldset) {
+        position: relative;
+    }
+    .settings-form :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
+        position: absolute;
+        top: 1.1rem;
+        right: 1.25rem;
+        border: none;
+    }
+    .settings-form :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) [data-layout="field"]) {
+        display: block;
+        padding: 0;
+    }
+    .settings-form
+        :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) :is([data-slot="field-description"], [data-slot="field-label"])) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
     }
 </style>

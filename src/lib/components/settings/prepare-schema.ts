@@ -3,6 +3,7 @@
 //   ("Downloaders" instead of "DownloadersModel"); sjsf shows the `$defs` title otherwise.
 // - Turn `anyOf: [X, {type: "null"}]` into a nullable X, so optional fields render as
 //   one input instead of an "option 1 / option 2" picker.
+// - Drop RTN's internal model docstring ("Custom Ranks used in SettingsModel.") from descriptions.
 // - Mask secrets (API keys, tokens, passwords) as password inputs.
 // - Language-code lists (items limited by a `^(en|fr|…)$` pattern) get a dropdown per entry,
 //   labelled "English (en)"; marked `x-language-list` so the page keeps them as lists.
@@ -60,6 +61,16 @@ function languageLists(node: Schema): Schema {
     return node;
 }
 
+const INTERNAL_DOCSTRING = /\bSettingsModel\b/;
+
+function dropInternalDocs(node: Schema): Schema {
+    if (typeof node.description === "string" && INTERNAL_DOCSTRING.test(node.description)) {
+        const { description: _, ...rest } = node;
+        return rest;
+    }
+    return node;
+}
+
 export function prepareSettingsSchema(schema: Schema): Schema {
     const defs = (schema.$defs ?? {}) as Record<string, Schema>;
 
@@ -79,7 +90,7 @@ export function prepareSettingsSchema(schema: Schema): Schema {
             const { $ref: _, ...rest } = current;
             const target = resolve(defs[name], new Set([...seen, name])) as Schema;
             current = { ...target, ...rest };
-            return languageLists(maskSecrets(collapseNullable(current)));
+            return dropInternalDocs(languageLists(maskSecrets(collapseNullable(current))));
         }
 
         const out: Schema = {};
@@ -87,7 +98,7 @@ export function prepareSettingsSchema(schema: Schema): Schema {
             if (key === "$defs") continue;
             out[key] = resolve(value, seen);
         }
-        return languageLists(maskSecrets(collapseNullable(out)));
+        return dropInternalDocs(languageLists(maskSecrets(collapseNullable(out))));
     };
 
     return resolve(schema, new Set()) as Schema;
