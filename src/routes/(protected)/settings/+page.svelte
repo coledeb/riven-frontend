@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { ActionData, PageData } from "./$types";
-    import { BasicForm } from "@sjsf/form";
+    import { BasicForm, setValue } from "@sjsf/form";
     import { createMeta, setupSvelteKitForm } from "@sjsf/sveltekit/client";
     import * as defaults from "$lib/components/settings/form-defaults";
     import { setShadcnContext } from "$lib/components/shadcn-context";
@@ -110,8 +110,13 @@
             ] as never,
         delayedMs: 500,
         timeoutMs: 30000,
+        // sjsf's default native form reset puts every field back to its page-load value, and the
+        // form never picks up the reloaded data, so a saved change looked undone. Skip the reset and
+        // show what the backend stored instead (page data is reloaded before onSuccess runs).
+        reset: false,
         onSuccess: (result) => {
             if (result.type === "success") {
+                setValue(form, data.form.initialValue as never);
                 invalidSections = [];
                 toast.success("Settings saved");
             } else {
