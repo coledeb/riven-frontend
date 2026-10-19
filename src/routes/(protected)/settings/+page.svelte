@@ -65,6 +65,12 @@
         })
     );
 
+    // One fixed rule per section, keyed on the wrapper's data-active (rewriting a single rule on
+    // every change sometimes wasn't re-applied after hydration, leaving the first section blank).
+    const sectionStyles = `<style>${sections
+        .map((s) => `.settings-form[data-active="${s.id}"] [data-section="${s.id}"] { display: block !important; }`)
+        .join("\n")}</style>`;
+
     let active = $state(GENERAL);
     let invalidSections = $state<string[]>([]);
     const current = $derived(sections.find((s) => s.id === active) ?? sections[0]);
@@ -132,7 +138,7 @@
 <svelte:head>
     <title>Settings - Riven</title>
     <!-- Only the active section's fields are shown; it stays one form, so Save covers every section. -->
-    {@html `<style>.settings-form [data-section="${active}"] { display: block !important; }</style>`}
+    {@html sectionStyles}
 </svelte:head>
 
 <PageShell class="h-full">
@@ -388,6 +394,13 @@
         align-self: flex-start;
         width: auto;
         margin-bottom: 0.75rem;
+    }
+
+    /* Read-only values (e.g. Version) look like text, not an editable box. */
+    .settings-form :global(input[readonly]) {
+        opacity: 0.6;
+        cursor: default;
+        pointer-events: none;
     }
 
     /* The form's own Save button is replaced by the one in the section header. */

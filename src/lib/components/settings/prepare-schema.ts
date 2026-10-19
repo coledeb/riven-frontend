@@ -3,6 +3,7 @@
 //   ("Downloaders" instead of "DownloadersModel"); sjsf shows the `$defs` title otherwise.
 // - Turn `anyOf: [X, {type: "null"}]` into a nullable X, so optional fields render as
 //   one input instead of an "option 1 / option 2" picker.
+// - Version is read-only: the backend always sets it from the installed Riven version.
 // - Drop RTN's internal model docstring ("Custom Ranks used in SettingsModel.") from descriptions.
 // - Mask secrets (API keys, tokens, passwords) as password inputs.
 // - Language-code lists (items limited by a `^(en|fr|…)$` pattern) get a dropdown per entry,
@@ -101,5 +102,11 @@ export function prepareSettingsSchema(schema: Schema): Schema {
         return dropInternalDocs(languageLists(maskSecrets(collapseNullable(out))));
     };
 
-    return resolve(schema, new Set()) as Schema;
+    const prepared = resolve(schema, new Set()) as Schema;
+    const version = isObject(prepared.properties) ? prepared.properties.version : undefined;
+    if (isObject(version)) {
+        version.readOnly = true;
+        version.description = "Installed Riven version (set automatically)";
+    }
+    return prepared;
 }
