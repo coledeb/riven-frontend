@@ -4,6 +4,7 @@ import providers from "$lib/providers";
 import type { InitialFormData } from "@sjsf/sveltekit";
 import { createFormHandler } from "@sjsf/sveltekit/server";
 import * as defaults from "$lib/components/settings/form-defaults";
+import { prepareSettingsSchema } from "$lib/components/settings/prepare-schema";
 
 const getSchema = async (baseUrl: string, apiKey: string, fetch: typeof globalThis.fetch) => {
     const settingsSchema = await providers.riven.GET("/api/v1/settings/schema", {
@@ -17,7 +18,7 @@ const getSchema = async (baseUrl: string, apiKey: string, fetch: typeof globalTh
         throw new Error("Failed to load settings schema");
     }
 
-    return settingsSchema.data;
+    return prepareSettingsSchema(settingsSchema.data as Record<string, unknown>);
 };
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
@@ -46,7 +47,6 @@ export const actions = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handleForm = createFormHandler<any, true>({
             ...defaults,
-            // @ts-expect-error - it's valid
             schema: await getSchema(locals.backendUrl, locals.apiKey, fetch),
             sendData: true
         });
