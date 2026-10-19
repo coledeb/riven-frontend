@@ -28,7 +28,6 @@ export interface ResolveOptions {
     to: Indexer;
     id: number | string;
     mediaType: MediaType;
-    tvdbToken?: string;
     customFetch: typeof fetch;
     rivenBaseUrl?: string;
     rivenApiKey?: string;
@@ -96,7 +95,7 @@ async function getMovieExternalIds(tmdbId: number, customFetch: typeof fetch) {
  * TMDB -> TVDB (TV shows only)
  */
 async function tmdbToTvdb(options: ResolveOptions): Promise<ResolveResult> {
-    const { id, mediaType, customFetch, tvdbToken } = options;
+    const { id, mediaType, customFetch } = options;
     const tmdbId = Number(id);
 
     if (mediaType === "movie") {
@@ -122,40 +121,34 @@ async function tmdbToTvdb(options: ResolveOptions): Promise<ResolveResult> {
     }
 
     // Fallback: TVDB search by remote ID (TMDB ID)
-    if (tvdbToken) {
-        try {
-            const { data, error } = await providers.tvdb.GET("/search/remoteid/{remoteId}", {
-                params: { path: { remoteId: String(id) } },
-                headers: { Authorization: `Bearer ${tvdbToken}` },
-                fetch: customFetch
-            });
+    try {
+        const { data, error } = await providers.tvdb.GET("/search/remoteid/{remoteId}", {
+            params: { path: { remoteId: String(id) } }
+        });
 
-            if (!error) {
-                // Find a series result (ignore movies - we only resolve TV shows)
-                const match = data?.data?.find((r) => r.series)?.series;
-                if (match?.id) {
-                    return { id: Number(match.id), resolved: true };
-                }
+        if (!error) {
+            // Find a series result (ignore movies - we only resolve TV shows)
+            const match = data?.data?.find((r) => r.series)?.series;
+            if (match?.id) {
+                return { id: Number(match.id), resolved: true };
             }
-        } catch (e) {
-            logger.warn(`TVDB remote_id search failed for ${id}:`, e);
         }
+    } catch (e) {
+        logger.warn(`TVDB remote_id search failed for ${id}:`, e);
+    }
 
-        // Final fallback: Check if TMDB ID exists as a TVDB series ID directly
-        // (sometimes IDs match between systems)
-        try {
-            const { data, error } = await providers.tvdb.GET("/series/{id}", {
-                params: { path: { id: tmdbId } },
-                headers: { Authorization: `Bearer ${tvdbToken}` },
-                fetch: customFetch
-            });
+    // Final fallback: Check if TMDB ID exists as a TVDB series ID directly
+    // (sometimes IDs match between systems)
+    try {
+        const { data, error } = await providers.tvdb.GET("/series/{id}", {
+            params: { path: { id: tmdbId } }
+        });
 
-            if (!error && data?.data?.id) {
-                return { id: Number(data.data.id), resolved: true };
-            }
-        } catch {
-            // Series doesn't exist with this ID, that's fine
+        if (!error && data?.data?.id) {
+            return { id: Number(data.data.id), resolved: true };
         }
+    } catch {
+        // Series doesn't exist with this ID, that's fine
     }
 
     logger.warn(`Could not resolve TMDB ${id} to TVDB`);

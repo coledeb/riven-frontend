@@ -17,14 +17,16 @@ import type { paths as TraktPaths } from "./trakt";
 import type { paths as RivenPaths } from "./riven";
 import { parseTMDBMovieDetails, parseTVDBShowDetails } from "./parser";
 import { customFetch } from "$lib/custom-fetch";
+import { tvdbFetch } from "$lib/tvdb-session";
 
 const rivenClient = createClient<RivenPaths>({
     baseUrl: ""
 });
 
+// `tvdbFetch` adds the TVDB login token, so callers don't pass one.
 const tvdbClient = createClient<TVDBPaths>({
     baseUrl: "https://api4.thetvdb.com/v4",
-    fetch: customFetch
+    fetch: tvdbFetch
 });
 
 const TMDB_READ_ACCESS_TOKEN =
