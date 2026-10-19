@@ -397,27 +397,42 @@
         display: none;
     }
 
-    /* A card's Enabled switch sits on the title line instead of its own row. */
+    /* A card's Enabled switch sits on the title line instead of its own row. Named entries (library
+       profiles) have no visible title, so they keep a normal Enabled row. */
     .settings-form :global([data-section] fieldset fieldset) {
         position: relative;
     }
-    .settings-form :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
+    .settings-form :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
         position: absolute;
         top: 1.1rem;
         right: 1.25rem;
         border: none;
     }
-    .settings-form :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) [data-layout="field"]) {
+    /* Sub-groups inside a card have no side padding. */
+    .settings-form :global([data-section] fieldset fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
+        right: 0;
+    }
+    .settings-form :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) [data-layout="field"]) {
         display: block;
         padding: 0;
     }
     .settings-form
-        :global([data-section] fieldset fieldset > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) :is([data-slot="field-description"], [data-slot="field-label"])) {
+        :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) :is([data-slot="field-description"], [data-slot="field-label"])) {
         position: absolute;
         width: 1px;
         height: 1px;
         overflow: hidden;
         clip: rect(0 0 0 0);
         white-space: nowrap;
+    }
+
+    /* Named entries: delete button on the id row. */
+    .settings-form :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-controls"]) {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+    }
+    .settings-form :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"]) {
+        grid-row: 2;
     }
 </style>
