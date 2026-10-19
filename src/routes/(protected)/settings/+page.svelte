@@ -7,6 +7,7 @@
     import { toast } from "svelte-sonner";
     import { icons } from "@sjsf/lucide-icons";
     import PageShell from "$lib/components/page-shell.svelte";
+    import { Button } from "$lib/components/ui/button";
     import { onMount, tick } from "svelte";
     setShadcnContext();
 
@@ -38,12 +39,15 @@
 
     type UiNode = Record<string, unknown> & { "ui:options"?: Record<string, unknown> };
 
-    // Secrets (marked `format: "password"` by prepareSettingsSchema) render as password inputs.
-    function secretsUi(prop: Schema & { format?: string }): UiNode {
+    // Per-field UI tweaks driven by markers prepareSettingsSchema adds to the schema:
+    // secrets (`format: "password"`) render as password inputs; language lists stay lists of
+    // dropdowns (sjsf would otherwise turn a unique list of choices into a checkbox grid).
+    function fieldUi(prop: Schema & { format?: string; "x-language-list"?: boolean }): UiNode {
         if (prop.format === "password") return { "ui:options": { shadcn4Text: { type: "password", autocomplete: "off" } } };
+        if (prop["x-language-list"]) return { "ui:components": { multiEnumField: "arrayField" } };
         const node: UiNode = {};
         for (const [key, child] of Object.entries(prop.properties ?? {})) {
-            const childUi = secretsUi(child);
+            const childUi = fieldUi(child);
             if (Object.keys(childUi).length) node[key] = childUi;
         }
         return node;
@@ -52,7 +56,7 @@
     // Tag each top-level field with its section; the stylesheet shows only the active one.
     const uiSchema = Object.fromEntries(
         Object.entries(properties).map(([key, prop]) => {
-            const ui = secretsUi(prop);
+            const ui = fieldUi(prop);
             ui["ui:options"] = {
                 ...ui["ui:options"],
                 layouts: { "object-property": { "data-section": isSection(prop) ? key : GENERAL } }
@@ -95,7 +99,7 @@
 
     const meta = createMeta<ActionData, PageData>().form;
 
-    const { form } = setupSvelteKitForm(meta, {
+    const { form, request } = setupSvelteKitForm(meta, {
         ...defaults,
         icons,
         uiSchema,
@@ -155,11 +159,17 @@
         </nav>
 
         <div class="min-w-0 flex-1 md:max-w-3xl">
-            <header class="mb-6">
-                <h2 class="text-xl font-semibold">{current.title}</h2>
-                {#if current.description}
-                    <p class="text-muted-foreground mt-1 text-sm">{current.description}</p>
-                {/if}
+            <header class="mb-6 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-semibold">{current.title}</h2>
+                    {#if current.description}
+                        <p class="text-muted-foreground mt-1 text-sm">{current.description}</p>
+                    {/if}
+                </div>
+                <!-- Submits the form below (`form` attribute), so it saves every section. -->
+                <Button type="submit" form="settings-form" class="shrink-0" disabled={request.isProcessed}>
+                    {request.isProcessed ? "Saving…" : "Save changes"}
+                </Button>
             </header>
 
             <div
@@ -167,7 +177,7 @@
                 class="settings-form"
                 data-active={active}
                 onsubmitcapture={checkErrors}>
-                <BasicForm {form} method="POST" novalidate></BasicForm>
+                <BasicForm {form} id="settings-form" method="POST" novalidate></BasicForm>
             </div>
         </div>
     </div>
@@ -305,6 +315,7 @@
     .settings-form :global(fieldset[data-layout="array-field"] > [data-slot="field-description"]) {
         grid-column: 1;
         grid-row: 2;
+        align-self: start;
     }
     .settings-form :global(fieldset[data-layout="array-field"] > [data-layout="array-items"]) {
         grid-row: 1 / span 2;
@@ -348,13 +359,40 @@
         display: none;
     }
 
-    /* Save stays reachable at the bottom of the viewport. */
+    /* Simple name → value maps (e.g. Plex path mappings): one row of [name] [value] [delete]. */
+    .settings-form
+        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"])) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .settings-form
+        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > [data-layout="object-property-content"]) {
+        grid-column: auto;
+    }
+    .settings-form
+        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > :is([data-layout="object-property-key-input"], [data-layout="object-property-content"]) [data-layout="field"]) {
+        display: block;
+        padding: 0;
+    }
+    .settings-form
+        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > :is([data-layout="object-property-key-input"], [data-layout="object-property-content"]) [data-layout="field-title-row"]) {
+        display: none;
+    }
+    .settings-form :global(fieldset[data-layout="object-field"] > button) {
+        align-self: flex-start;
+        width: auto;
+        margin-bottom: 0.75rem;
+    }
+
+    /* The form's own Save button is replaced by the one in the section header. */
     .settings-form :global(form > button[type="submit"]) {
-        position: sticky;
-        bottom: 1.5rem;
-        margin-top: 1.5rem;
-        margin-left: auto;
-        display: flex;
-        box-shadow: 0 4px 16px rgb(0 0 0 / 0.35);
+        display: none;
+    }
+
+    /* A disabled service collapses to its title, description and Enabled switch. */
+    .settings-form
+        :global(fieldset:has(> [data-layout="object-properties"] > [data-layout="object-property"] > [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"][aria-checked="false"]) > [data-layout="object-properties"] > [data-layout="object-property"]:not(:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]))) {
+        display: none;
     }
 </style>

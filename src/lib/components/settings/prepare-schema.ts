@@ -4,6 +4,8 @@
 // - Turn `anyOf: [X, {type: "null"}]` into a nullable X, so optional fields render as
 //   one input instead of an "option 1 / option 2" picker.
 // - Mask secrets (API keys, tokens, passwords) as password inputs.
+// - Language-code lists (items limited by a `^(en|fr|…)$` pattern) get a dropdown per entry,
+//   labelled "English (en)"; marked `x-language-list` so the page keeps them as lists.
 
 type Schema = Record<string, unknown>;
 
@@ -35,6 +37,29 @@ function maskSecrets(node: Schema): Schema {
     return node;
 }
 
+const CODE_PATTERN = /^\^\(((?:[a-z]{2}\|)*[a-z]{2})\)\$$/;
+const languageNames = new Intl.DisplayNames(["en"], { type: "language" });
+
+function languageLists(node: Schema): Schema {
+    if (!isObject(node.properties)) return node;
+    for (const prop of Object.values(node.properties)) {
+        if (!isObject(prop) || prop.type !== "array" || !isObject(prop.items)) continue;
+        const items = prop.items;
+        const match = typeof items.pattern === "string" ? CODE_PATTERN.exec(items.pattern) : null;
+        if (!match) continue;
+        const { pattern: _, ...rest } = items;
+        prop.items = {
+            ...rest,
+            oneOf: match[1]
+                .split("|")
+                .map((code) => ({ const: code, title: `${languageNames.of(code) ?? code} (${code})` }))
+                .sort((a, b) => a.title.localeCompare(b.title))
+        };
+        prop["x-language-list"] = true;
+    }
+    return node;
+}
+
 export function prepareSettingsSchema(schema: Schema): Schema {
     const defs = (schema.$defs ?? {}) as Record<string, Schema>;
 
@@ -54,7 +79,7 @@ export function prepareSettingsSchema(schema: Schema): Schema {
             const { $ref: _, ...rest } = current;
             const target = resolve(defs[name], new Set([...seen, name])) as Schema;
             current = { ...target, ...rest };
-            return maskSecrets(collapseNullable(current));
+            return languageLists(maskSecrets(collapseNullable(current)));
         }
 
         const out: Schema = {};
@@ -62,7 +87,7 @@ export function prepareSettingsSchema(schema: Schema): Schema {
             if (key === "$defs") continue;
             out[key] = resolve(value, seen);
         }
-        return maskSecrets(collapseNullable(out));
+        return languageLists(maskSecrets(collapseNullable(out)));
     };
 
     return resolve(schema, new Set()) as Schema;
