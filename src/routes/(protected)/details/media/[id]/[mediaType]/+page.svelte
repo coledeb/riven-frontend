@@ -34,8 +34,25 @@
     import VideoPlayer from "$lib/components/media/video-player.svelte";
     import { toast } from "svelte-sonner";
     import X from "@lucide/svelte/icons/x";
+    import { invalidateAll } from "$app/navigation";
+    import { mediaProgressStore } from "$lib/stores/media-progress.svelte";
 
     let { data }: PageProps = $props();
+
+    // Reload once the item completes while the page is open, so its actions update.
+    let reloadedFor: number | undefined;
+    $effect(() => {
+        const id = data.riven?.id === undefined ? undefined : Number(data.riven.id);
+        if (
+            id !== undefined &&
+            id !== reloadedFor &&
+            data.riven?.state !== "Completed" &&
+            mediaProgressStore.getItemState(id) === "Completed"
+        ) {
+            reloadedFor = id;
+            invalidateAll();
+        }
+    });
 
     const isMobile = new IsMobile();
 
@@ -208,7 +225,7 @@
         class="h-full transition-transform duration-300 group-hover:scale-[1.01] group-hover:shadow-lg">
         {#snippet topRight()}
             {#if rivenEpisode?.state}
-                <StatusBadge state={rivenEpisode.state} />
+                <StatusBadge state={rivenEpisode.state} itemId={rivenEpisode.id} />
             {/if}
         {/snippet}
         {#snippet meta()}
@@ -234,7 +251,10 @@
         {#if episode.runtime}<Badge variant="outline" class="font-mono text-xs"
                 >{episode.runtime} min</Badge
             >{/if}
-        {#if rivenEpisode}<StatusBadge class="text-xs" state={rivenEpisode.state} />{/if}
+        {#if rivenEpisode}<StatusBadge
+                class="text-xs"
+                state={rivenEpisode.state}
+                itemId={rivenEpisode.id} />{/if}
     </div>
 {/snippet}
 
@@ -482,7 +502,8 @@
                             {#if data.riven?.state}
                                 <StatusBadge
                                     class="px-3 py-1.5 text-sm font-medium"
-                                    state={data.riven.state} />
+                                    state={data.riven.state}
+                                    itemId={data.riven.id} />
                             {/if}
                         </div>
 
@@ -777,6 +798,7 @@
                                                     {#if rivenSeason?.state}
                                                         <StatusBadge
                                                             state={rivenSeason.state}
+                                                            itemId={rivenSeason.id}
                                                             size="default" />
                                                     {/if}
                                                 {/snippet}
