@@ -34,14 +34,32 @@
             }
         };
 
+        // The settings page clears the box when a section is picked
+        const clearSettingsSearch = () => {
+            if (onSettings) inputValue = "";
+        };
+
         window.addEventListener("riven:search", handleSearch);
-        return () => window.removeEventListener("riven:search", handleSearch);
+        window.addEventListener("riven:settings-search-clear", clearSettingsSearch);
+        return () => {
+            window.removeEventListener("riven:search", handleSearch);
+            window.removeEventListener("riven:settings-search-clear", clearSettingsSearch);
+        };
     });
 
     // Local input value state to decouple from URL updates while typing
     let inputValue = $state(page.url.searchParams.get("query") || "");
     let inputRef = $state<HTMLInputElement | null>(null);
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+    // On the settings page the box filters the settings instead of searching media.
+    const onSettings = $derived(page.url.pathname === "/settings");
+
+    function searchSettings() {
+        window.dispatchEvent(
+            new CustomEvent("riven:settings-search", { detail: { query: inputValue.trim() } })
+        );
+    }
 
     // Sync external URL changes to input, but avoid overwriting while typing
     // We use afterNavigate instead of $effect to avoid state loops
@@ -77,6 +95,7 @@
 
     function handleInput() {
         clearTimeout(debounceTimer);
+        if (onSettings) return searchSettings();
         debounceTimer = setTimeout(navigateToSearch, 300);
     }
 
@@ -104,13 +123,21 @@
                 <InputGroup.Input
                     bind:ref={inputRef}
                     name="query"
-                    placeholder="Search movies, shows, people..."
+                    placeholder={onSettings
+                        ? "Search settings..."
+                        : "Search movies, shows, people..."}
                     aria-label="Search"
                     bind:value={inputValue}
                     class="text-sm font-medium placeholder:text-white/40"
                     oninput={handleInput}
                     onkeydown={(e) => {
-                        if (e.key === "Enter") {
+                        if (onSettings) {
+                            if (e.key === "Escape") {
+                                inputValue = "";
+                                searchSettings();
+                            }
+                            if (e.key === "Enter") e.preventDefault();
+                        } else if (e.key === "Enter") {
                             e.preventDefault();
                             navigateToSearch();
                         }

@@ -12,7 +12,7 @@ export class LogStore {
     #logs = $state<LogEntry[]>([]);
     #historicalLogs = $state<LogEntry[]>([]);
     #isLoadingHistorical = $state<boolean>(false);
-    #activeTab = $state<"live" | "historical">("live");
+    #activeTab = $state<"live" | "historical" | "blacklist">("live");
     #error = $state<string | null>(null);
     #historicalError = $state<string | null>(null);
     #connectionStatus = $state<"connecting" | "connected" | "disconnected" | "error">(
@@ -144,7 +144,7 @@ export class LogStore {
         this.connect();
     }
 
-    setActiveTab(tab: "live" | "historical") {
+    setActiveTab(tab: "live" | "historical" | "blacklist") {
         this.#activeTab = tab;
         if (tab === "historical" && this.#historicalLogs.length === 0) {
             this.fetchHistoricalLogs();

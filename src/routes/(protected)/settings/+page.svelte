@@ -59,7 +59,12 @@
             const ui = fieldUi(prop);
             ui["ui:options"] = {
                 ...ui["ui:options"],
-                layouts: { "object-property": { "data-section": isSection(prop) ? key : GENERAL } }
+                layouts: {
+                    "object-property": {
+                        "data-section": isSection(prop) ? key : GENERAL,
+                        "data-section-title": isSection(prop) ? (prop.title ?? key) : "General"
+                    }
+                }
             };
             return [key, ui];
         })
@@ -76,6 +81,10 @@
     const current = $derived(sections.find((s) => s.id === active) ?? sections[0]);
 
     function select(id: string) {
+        if (query) {
+            query = "";
+            window.dispatchEvent(new CustomEvent("riven:settings-search-clear"));
+        }
         active = id;
         history.replaceState(history.state, "", `#${id}`);
         window.scrollTo({ top: 0 });
@@ -84,9 +93,78 @@
     onMount(() => {
         const fromHash = location.hash.slice(1);
         if (sections.some((s) => s.id === fromHash)) active = fromHash;
+
+        const onSearch = (e: Event) => {
+            query = (e as CustomEvent<{ query: string }>).detail.query;
+        };
+        window.addEventListener("riven:settings-search", onSearch);
+        return () => window.removeEventListener("riven:settings-search", onSearch);
     });
 
     let formEl = $state<HTMLElement>();
+
+    // The header's search box filters fields across every section (see header.svelte).
+    let query = $state("");
+    let matchedSections = $state<string[]>([]);
+
+    const PROPERTY = '[data-layout="object-property"]';
+    const ownedBy = (el: Element) => (child: Element) =>
+        child.parentElement?.closest(PROPERTY) === el;
+
+    // A field matches when every word appears in its label/description or a parent group's;
+    // a matching group shows all its fields.
+    function applySearch(text: string) {
+        if (!formEl) return;
+        // Each word must start a word in the text ("api" finds "API key", not "rapid")
+        const terms = text
+            .toLowerCase()
+            .split(/\s+/)
+            .filter(Boolean)
+            .map((t) => new RegExp(`(^|[^a-z0-9])${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+        const all = formEl.querySelectorAll(PROPERTY);
+        all.forEach((el) => el.removeAttribute("data-search-hidden"));
+        formEl
+            .querySelectorAll("[data-search-first]")
+            .forEach((el) => el.removeAttribute("data-search-first"));
+        if (!terms.length) {
+            matchedSections = [];
+            return;
+        }
+
+        const visit = (el: Element, inherited: string): boolean => {
+            const own = [
+                ...el.querySelectorAll(
+                    'legend, [data-slot="field-label"], [data-slot="field-description"]'
+                )
+            ]
+                .filter((t) => t.closest(PROPERTY) === el)
+                .map((t) => t.textContent ?? "");
+            const haystack = `${inherited} ${own.join(" ")}`.toLowerCase();
+            if (terms.every((t) => t.test(haystack))) return true;
+            let any = false;
+            for (const child of [...el.querySelectorAll(PROPERTY)].filter(ownedBy(el))) {
+                if (visit(child, haystack)) any = true;
+                else child.setAttribute("data-search-hidden", "");
+            }
+            return any;
+        };
+
+        const found = new Set<string>();
+        for (const top of formEl.querySelectorAll("[data-section]")) {
+            if (visit(top, top.getAttribute("data-section-title") ?? "")) {
+                const id = top.getAttribute("data-section")!;
+                if (!found.has(id)) top.setAttribute("data-search-first", "");
+                found.add(id);
+            } else {
+                top.setAttribute("data-search-hidden", "");
+            }
+        }
+        matchedSections = sections.filter((s) => found.has(s.id)).map((s) => s.id);
+    }
+
+    $effect(() => {
+        applySearch(query);
+    });
 
     // Errors may sit in a hidden section: flag those sections and jump to the first one.
     async function checkErrors() {
@@ -155,11 +233,12 @@
                             aria-current={active === section.id ? "page" : undefined}
                             class={[
                                 "flex w-full items-center justify-between gap-2 rounded-md px-3 py-1.5 text-left text-sm whitespace-nowrap transition-colors",
-                                active === section.id
+                                active === section.id && !query
                                     ? "bg-primary/15 text-primary font-medium"
                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                             ]}>
-                            {section.title}
+                            <span class:opacity-40={query && !matchedSections.includes(section.id)}
+                                >{section.title}</span>
                             {#if invalidSections.includes(section.id)}
                                 <span class="bg-destructive size-2 rounded-full" title="Has errors"></span>
                             {/if}
@@ -172,8 +251,17 @@
         <div class="min-w-0 flex-1 md:max-w-3xl">
             <header class="mb-6 flex items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold">{current.title}</h2>
-                    {#if current.description}
+                    {#if query}
+                        <h2 class="text-xl font-semibold">Search results</h2>
+                        <p class="text-muted-foreground mt-1 text-sm">
+                            {matchedSections.length
+                                ? `Settings matching “${query}”. Pick a section to leave search.`
+                                : `No settings match “${query}”.`}
+                        </p>
+                    {:else}
+                        <h2 class="text-xl font-semibold">{current.title}</h2>
+                    {/if}
+                    {#if !query && current.description}
                         <p class="text-muted-foreground mt-1 text-sm">{current.description}</p>
                     {/if}
                 </div>
@@ -186,7 +274,7 @@
             <div
                 bind:this={formEl}
                 class="settings-form"
-                data-active={active}
+                data-active={query ? "search" : active}
                 onsubmitcapture={checkErrors}>
                 <BasicForm {form} id="settings-form" method="POST" novalidate></BasicForm>
             </div>
@@ -197,6 +285,23 @@
 <style>
     .settings-form :global([data-section]) {
         display: none;
+    }
+    .settings-form[data-active="search"] :global([data-section]) {
+        display: block;
+    }
+    .settings-form :global([data-search-hidden]) {
+        display: none !important;
+    }
+    /* Section names between search results, which can come from every section. */
+    .settings-form[data-active="search"] :global([data-search-first]::before) {
+        content: attr(data-section-title);
+        display: block;
+        margin: 1.5rem 0 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
     }
     /* Root "AppModel" title and the section's own title/description (shown in the header instead). */
     .settings-form :global(form > fieldset > legend),

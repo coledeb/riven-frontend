@@ -7,6 +7,7 @@
     import { createScopedLogger } from "$lib/logger";
     import type { components } from "$lib/providers/riven";
     import { type Snippet } from "svelte";
+    import { blacklistExpiry, blacklistReason, formatBlacklistTime } from "$lib/blacklist";
 
     const logger = createScopedLogger("item-blacklist");
 
@@ -29,17 +30,6 @@
     }
     let { title, itemId, variant = "ghost", size = "sm", children, ...restProps }: Props =
         $props();
-
-    const REASONS: Record<string, string> = {
-        cdn_host_down: "CDN server pulled",
-        slow_source: "Too slow to play",
-        not_cached: "Not cached",
-        torrent_removed: "Removed from debrid account",
-        download_error: "Download error",
-        wrong_files: "Wrong files",
-        manual: "Manual",
-        unknown: "Unknown"
-    };
 
     let open = $state(false);
     let loading = $state(false);
@@ -78,25 +68,6 @@
             logger.error("Error response:", response.error);
             toast.error("Failed to unblacklist the torrent.");
         }
-    }
-
-    // The backend sends naive local times
-    function formatTime(value: string | null): string {
-        if (!value) return "";
-        return new Date(value).toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }
-
-    function expiry(entry: Entry): string {
-        if (!entry.expires_at) return "Permanent";
-        const hours = (new Date(entry.expires_at).getTime() - Date.now()) / 3_600_000;
-        if (hours <= 0) return "Expiring now";
-        if (hours < 48) return `in ${Math.ceil(hours)} h`;
-        return `in ${Math.round(hours / 24)} days`;
     }
 
     $effect(() => {
@@ -142,12 +113,12 @@
                                 <p class="text-sm font-medium break-all">{entry.raw_title}</p>
                                 <p class="text-muted-foreground mt-1 text-xs">
                                     {entry.item_label}
-                                    · {REASONS[entry.reason] ?? entry.reason}
+                                    · {blacklistReason(entry.reason)}
                                     {#if entry.blacklisted_at}
-                                        · {formatTime(entry.blacklisted_at)}
+                                        · {formatBlacklistTime(entry.blacklisted_at)}
                                     {/if}
                                     · <span class={entry.expires_at ? "" : "text-destructive"}
-                                        >{expiry(entry)}</span>
+                                        >{blacklistExpiry(entry.expires_at)}</span>
                                     {#if entry.strikes > 1}
                                         · strike {entry.strikes}
                                     {/if}

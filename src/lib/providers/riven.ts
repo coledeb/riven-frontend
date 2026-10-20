@@ -559,6 +559,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/items/blacklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Recent Blacklist Entries
+         * @description Blacklistings across the whole library, newest first, including released ones.
+         */
+        get: operations["get_recent_blacklist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/items/{item_id}/blacklist": {
         parameters: {
             query?: never;
@@ -3022,6 +3042,36 @@ export interface components {
         BlacklistResponse: {
             entries: components["schemas"]["BlacklistEntry"][];
         };
+        /** RecentBlacklistEntry */
+        RecentBlacklistEntry: {
+            /** @description The movie or episode the torrent is blacklisted for */
+            item_id: number;
+            item_type: string;
+            /** @description Movie or show title */
+            title: string;
+            /** @description e.g. S01E02 for an episode, else None */
+            item_label: string | null;
+            /** @description The movie or show, for linking */
+            top_item_id: number;
+            tmdb_id: string | null;
+            tvdb_id: string | null;
+            stream_id: number;
+            infohash: string;
+            raw_title: string;
+            resolution: string | null;
+            /** @description Why it was blacklisted (unknown for old entries) */
+            reason: string;
+            blacklisted_at: string | null;
+            /** @description None = permanent */
+            expires_at: string | null;
+            /** @description Set once expired and back in the pool */
+            released_at: string | null;
+            strikes: number;
+        };
+        /** RecentBlacklistResponse */
+        RecentBlacklistResponse: {
+            entries: components["schemas"]["RecentBlacklistEntry"][];
+        };
         StreamsResponse: {
             /** Message */
             message: string;
@@ -4529,6 +4579,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_recent_blacklist: {
+        parameters: {
+            query?: {
+                /** @description Max entries */
+                limit?: number;
+                /** @description Include entries that expired and were released */
+                include_released?: boolean;
+                api_key?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecentBlacklistResponse"];
+                };
             };
             /** @description Validation Error */
             422: {

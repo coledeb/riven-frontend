@@ -6,6 +6,7 @@
     import { logStore, type LogEntry } from "$lib/stores/logs.svelte";
     import { createScopedLogger } from "$lib/logger";
     import PageShell from "$lib/components/page-shell.svelte";
+    import BlacklistFeed from "$lib/components/logs/blacklist-feed.svelte";
 
     const logger = createScopedLogger("logs-page");
 
@@ -30,6 +31,10 @@
         reconnectAttempts: logStore.reconnectAttempts,
         maxReconnectAttempts: logStore.maxReconnectAttempts
     });
+
+    let blacklistCount = $state(0);
+    let blacklistActiveOnly = $state(false);
+    let blacklistRefresh = $state(0);
 
     onMount(() => {
         logStore.connect();
@@ -187,7 +192,11 @@
                     <Button variant="secondary" onclick={handleUploadLogs}>Upload Logs</Button>
                     <div
                         class="bg-primary/10 text-primary border-primary/20 rounded-lg border px-4 py-2 font-medium">
-                        {activeTab === "live" ? logs.length : historicalLogs.length} entries
+                        {activeTab === "live"
+                            ? logs.length
+                            : activeTab === "historical"
+                              ? historicalLogs.length
+                              : blacklistCount} entries
                     </div>
                 </div>
             </div>
@@ -202,6 +211,9 @@
                         {@render tabButton("Historical Logs", activeTab === "historical", () =>
                             logStore.setActiveTab("historical")
                         )}
+                        {@render tabButton("Blacklist", activeTab === "blacklist", () =>
+                            logStore.setActiveTab("blacklist")
+                        )}
                     </div>
                     <div class="flex items-center gap-4">
                         {#if activeTab === "live"}
@@ -213,6 +225,16 @@
                                     Reconnect Now
                                 </button>
                             {/if}
+                        {:else if activeTab === "blacklist"}
+                            <label class="text-muted-foreground flex items-center gap-2 text-sm">
+                                <input type="checkbox" bind:checked={blacklistActiveOnly} />
+                                Active only
+                            </label>
+                            <button
+                                class="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 rounded border px-3 py-1 text-sm font-medium transition-colors"
+                                onclick={() => blacklistRefresh++}>
+                                Refresh
+                            </button>
                         {:else}
                             <button
                                 class="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 rounded border px-3 py-1 text-sm font-medium transition-colors"
@@ -233,6 +255,11 @@
                         {:else if connectionStatus === "connecting"}
                             {@render loadingSpinner(getStatusText())}
                         {/if}
+                    {:else if activeTab === "blacklist"}
+                        <BlacklistFeed
+                            bind:count={blacklistCount}
+                            activeOnly={blacklistActiveOnly}
+                            refreshKey={blacklistRefresh} />
                     {:else if isLoadingHistorical}
                         {@render loadingSpinner("Loading historical logs...")}
                     {:else if historicalError}

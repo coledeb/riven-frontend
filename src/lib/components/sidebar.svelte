@@ -16,7 +16,6 @@
     import Settings from "@lucide/svelte/icons/settings";
     import Search from "@lucide/svelte/icons/search";
     import Library from "@lucide/svelte/icons/library";
-    import User from "@lucide/svelte/icons/user";
     import { getContext } from "svelte";
     import Tooltip from "./tooltip.svelte";
     import ThemeSwitcher from "./theme-switcher.svelte";
@@ -30,7 +29,6 @@
         { href: "/library", icon: Library, label: "Library" },
         { href: "/explore", icon: Search, label: "Explore" },
         { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-        { href: "/auth", icon: User, label: "Profile" },
         { href: "/settings", icon: Settings, label: "Settings" },
         { href: "/logs", icon: FileClock, label: "Logs" }
     ] as const;
