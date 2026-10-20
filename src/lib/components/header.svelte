@@ -53,7 +53,8 @@
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
     // On the settings page the box filters the settings instead of searching media.
-    const onSettings = $derived(page.url.pathname === "/settings");
+    // Matched by route, not URL: DUMB's embedded UI serves pages under /ui/riven_frontend/.
+    const onSettings = $derived(page.route.id === "/(protected)/settings");
 
     function searchSettings() {
         window.dispatchEvent(
