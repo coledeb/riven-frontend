@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.0.0-beta.4](https://github.com/coledeb/riven-frontend/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2026-10-23)
+
+
+### Features
+
+* add HLS streaming support ([a79711b](https://github.com/coledeb/riven-frontend/commit/a79711bf47bdb7eb42148c873741ac5f8eb52eb0))
+* blacklist dialog on media pages ([688303a](https://github.com/coledeb/riven-frontend/commit/688303ac651b749aa509909cddce9d331a36ccd3))
+* implement a modern design, extensive use of themes ([#295](https://github.com/coledeb/riven-frontend/issues/295)) ([4722e5d](https://github.com/coledeb/riven-frontend/commit/4722e5dc82d8b5bec93e2f9f2cbd0640e0533276))
+* live item progress on media pages ([ceecc09](https://github.com/coledeb/riven-frontend/commit/ceecc09fb82a3f16d15f6a64d56fb5e0628e614d))
+* settings search, Logs blacklist tab, no duplicate Profile nav item ([53a1acd](https://github.com/coledeb/riven-frontend/commit/53a1acd234b5955bfce0f8ab2e890cfca3ee8381))
+* **settings:** header switches, Fetch collapse, reveal button for secrets ([3565735](https://github.com/coledeb/riven-frontend/commit/35657358531cd33a80e88ed5e76bb5ef374f9bab))
+* **settings:** language dropdowns, collapsed disabled services, header Save ([42b71e5](https://github.com/coledeb/riven-frontend/commit/42b71e5801004f9270452e8a4eb58d34a1b284f0))
+* **settings:** sidebar sections and compact two-column layout ([9b7a4f3](https://github.com/coledeb/riven-frontend/commit/9b7a4f30d46573210cfd6b9e9375e6bb02106fc5))
+
+
+### Bug Fixes
+
+* change random avatar generator link ([d1a6b2c](https://github.com/coledeb/riven-frontend/commit/d1a6b2c235237128395a45ae1046b384cdbf5a4a))
+* improve logging ([38463f6](https://github.com/coledeb/riven-frontend/commit/38463f6da89589bc1c790c170bb5e4b6acb4614d))
+* minor log improvements ([d3778ac](https://github.com/coledeb/riven-frontend/commit/d3778ac851260dfdd0f0370eb5ad0eba62b17bd2))
+* settings search box also works in DUMB's embedded UI ([0c11e74](https://github.com/coledeb/riven-frontend/commit/0c11e74d0639495606f1a9740d93144f6f45d02c))
+* **settings:** keep saved values on screen after Save ([ac0f45e](https://github.com/coledeb/riven-frontend/commit/ac0f45edc65668f4d46c27a3ebadb862299c9081))
+* **settings:** read-only Version, reliable first section render ([2fd12f7](https://github.com/coledeb/riven-frontend/commit/2fd12f7cfcaa4681c07f496c10eb553eb0e5e333))
+* **settings:** switch placement in sub-groups and library profiles ([b910fc7](https://github.com/coledeb/riven-frontend/commit/b910fc73a664158f45464e9096ecb08140695a36))
+* **tvdb:** a TVDB outage no longer breaks every page ([e5f363f](https://github.com/coledeb/riven-frontend/commit/e5f363f63034f8df8b140ae06746aed8f67cfc95))
+
+
+### Miscellaneous Chores
+
+* fix lint/format in fork code and duplicate Trakt operation types ([7b00ed0](https://github.com/coledeb/riven-frontend/commit/7b00ed03e189f6f9092a07a7c82b065b920e48d8))
+* format ([2702e90](https://github.com/coledeb/riven-frontend/commit/2702e90e13893b422dd97af0f5a40ab3ad916ca8))
+
+
+### Build System and Dependencies
+
+* **deps-dev:** bump @sveltejs/kit from 2.49.2 to 2.49.5 ([#296](https://github.com/coledeb/riven-frontend/issues/296)) ([3477a58](https://github.com/coledeb/riven-frontend/commit/3477a58c2915b44dc970d9742552e506791b2a8d))
+* **deps-dev:** bump svelte from 5.46.1 to 5.46.4 ([#297](https://github.com/coledeb/riven-frontend/issues/297)) ([ed39458](https://github.com/coledeb/riven-frontend/commit/ed39458be95b5e9b0be7a70df18b091db32b7ba4))
+* update api endpoints spec ([f25f491](https://github.com/coledeb/riven-frontend/commit/f25f491b756141349d04a199767705021e339f0c))
+* update deps ([516c5e6](https://github.com/coledeb/riven-frontend/commit/516c5e60a1cdcb27c8437537ba89c66ea4d03cbb))
+* update deps ([4513a83](https://github.com/coledeb/riven-frontend/commit/4513a83d1e7d0eb94184045341813d6a92f52c1d))
+
 ## [1.0.0-beta.3](https://github.com/rivenmedia/riven-frontend/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2025-12-24)
 
 ### Features
