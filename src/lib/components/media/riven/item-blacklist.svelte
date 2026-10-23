@@ -28,8 +28,7 @@
         class?: string;
         children?: Snippet;
     }
-    let { title, itemId, variant = "ghost", size = "sm", children, ...restProps }: Props =
-        $props();
+    let { title, itemId, variant = "ghost", size = "sm", children, ...restProps }: Props = $props();
 
     let open = $state(false);
     let loading = $state(false);
@@ -92,9 +91,8 @@
         <Dialog.Header>
             <Dialog.Title>Blacklisted torrents: {title ?? "Media Item"}</Dialog.Title>
             <Dialog.Description>
-                Torrents Riven won't use for this item. Temporary problems expire back into the
-                pool on their own (Settings → Scraping → Blacklist); unblacklisting puts one back
-                now.
+                Torrents Riven won't use for this item. Temporary problems expire back into the pool
+                on their own (Settings → Scraping → Blacklist); unblacklisting puts one back now.
             </Dialog.Description>
         </Dialog.Header>
 
@@ -117,7 +115,8 @@
                                     {#if entry.blacklisted_at}
                                         · {formatBlacklistTime(entry.blacklisted_at)}
                                     {/if}
-                                    · <span class={entry.expires_at ? "" : "text-destructive"}
+                                    ·
+                                    <span class={entry.expires_at ? "" : "text-destructive"}
                                         >{blacklistExpiry(entry.expires_at)}</span>
                                     {#if entry.strikes > 1}
                                         · strike {entry.strikes}

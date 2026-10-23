@@ -13,9 +13,7 @@
     const lines = $derived(
         String(description ?? "")
             .split("\n")
-            .map((line) =>
-                line.split("**").map((text, i) => ({ text, bold: i % 2 === 1 }))
-            )
+            .map((line) => line.split("**").map((text, i) => ({ text, bold: i % 2 === 1 })))
     );
 </script>
 

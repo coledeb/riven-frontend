@@ -335,7 +335,7 @@ export interface paths {
          *
          *     Returns all shows airing during the time period specified.
          */
-        get: operations["Get shows"];
+        get: operations["Get shows (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -357,7 +357,7 @@ export interface paths {
          *
          *     Returns all new show premieres (`series_premiere`) airing during the time period specified.
          */
-        get: operations["Get new shows"];
+        get: operations["Get new shows (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -379,7 +379,7 @@ export interface paths {
          *
          *     Returns all show premieres (`mid_season_premiere`, `season_premiere`, `series_premiere`) airing during the time period specified.
          */
-        get: operations["Get season premieres"];
+        get: operations["Get season premieres (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -401,7 +401,7 @@ export interface paths {
          *
          *     Returns all show finales (`mid_season_finale`, `season_finale`, `series_finale`) airing during the time period specified.
          */
-        get: operations["Get finales"];
+        get: operations["Get finales (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -423,7 +423,7 @@ export interface paths {
          *
          *     Returns all movies with a release date during the time period specified.
          */
-        get: operations["Get movies"];
+        get: operations["Get movies (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -445,7 +445,7 @@ export interface paths {
          *
          *     Returns all movies with a `us` streaming release date during the time period specified.
          */
-        get: operations["Get streaming releases"];
+        get: operations["Get streaming releases (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -467,7 +467,7 @@ export interface paths {
          *
          *     Returns all movies with a `us` DVD release date during the time period specified.
          */
-        get: operations["Get DVD releases"];
+        get: operations["Get DVD releases (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2731,7 +2731,7 @@ export interface paths {
          *
          *     Returns all users watching this show right now.
          */
-        get: operations["Get users watching right now"];
+        get: operations["Get users watching right now (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2797,7 +2797,7 @@ export interface paths {
          *
          *     Returns all videos including trailers, teasers, clips, and featurettes.
          */
-        get: operations["Get all videos"];
+        get: operations["Get all videos (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3062,7 +3062,7 @@ export interface paths {
          *
          *     Returns all users watching this season right now.
          */
-        get: operations["Get users watching right now"];
+        get: operations["Get users watching right now (3)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3084,7 +3084,7 @@ export interface paths {
          *
          *     Returns all videos including trailers, teasers, clips, and featurettes.
          */
-        get: operations["Get all videos"];
+        get: operations["Get all videos (3)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3272,7 +3272,7 @@ export interface paths {
          *
          *     Returns all videos including trailers, teasers, clips, and featurettes.
          */
-        get: operations["Get all videos"];
+        get: operations["Get all videos (4)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4311,7 +4311,7 @@ export interface paths {
          *
          *     If you add `?extended=metadata` to the URL, it will return the additional `media_type`, `resolution`, `hdr`, `audio`, `audio_channels` and '3d' metadata. It will use `null` if the metadata isn't set for an item.
          */
-        get: operations["Get collection"];
+        get: operations["Get collection (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4539,7 +4539,7 @@ export interface paths {
          *
          *     Returns all users who liked a list.
          */
-        get: operations["Get all users who liked a list"];
+        get: operations["Get all users who liked a list (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4563,14 +4563,14 @@ export interface paths {
          *
          *     Votes help determine popular lists. Only one like is allowed per list per user.
          */
-        post: operations["Like a list"];
+        post: operations["Like a list (2)"];
         /**
          * Remove like on a list
          * @description #### &#128274; OAuth Required
          *
          *     Remove a like on a list.
          */
-        delete: operations["Remove like on a list"];
+        delete: operations["Remove like on a list (2)"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4740,7 +4740,7 @@ export interface paths {
          *     > ### 🅽🅾🆃🅴
          *     > _If you send OAuth, comments from blocked users will be automatically filtered out._
          */
-        get: operations["Get all list comments"];
+        get: operations["Get all list comments (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4868,7 +4868,7 @@ export interface paths {
          *     | `/history/seasons/3950` | All episodes of Breaking Bad: Season 1 |
          *     | `/history/episodes/73482` | Only episode 1 for Breaking Bad: Season 1 |
          */
-        get: operations["Get watched history"];
+        get: operations["Get watched history (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4890,7 +4890,7 @@ export interface paths {
          *
          *     Get a user's ratings filtered by `type`. You can optionally filter for a specific `rating` between 1 and 10. Send a comma separated string for `rating` if you need multiple ratings.
          */
-        get: operations["Get ratings"];
+        get: operations["Get ratings (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4929,7 +4929,7 @@ export interface paths {
          *
          *     When an item is watched, it will be automatically removed from the watchlist. For shows and seasons, watching 1 episode will remove the entire show or season.
          */
-        get: operations["Get watchlist"];
+        get: operations["Get watchlist (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4986,7 +4986,7 @@ export interface paths {
          *
          *     Some `sort_by` options are 🔥 **VIP Only** including `imdb_rating`, `tmdb_rating`, `rt_tomatometer`, `rt_audience`, `metascore`, `votes`, `imdb_votes`, and `tmdb_votes`. If sent for a non VIP, the items will fall back to  `rank`.
          */
-        get: operations["Get favorites"];
+        get: operations["Get favorites (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5011,7 +5011,7 @@ export interface paths {
          *     > ### 🅽🅾🆃🅴
          *     > _If you send OAuth, comments from blocked users will be automatically filtered out._
          */
-        get: operations["Get all favorites comments"];
+        get: operations["Get all favorites comments (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5061,7 +5061,7 @@ export interface paths {
          *
          *     Each `show` object contains a `reset_at` timestamp. If not `null`, this is when the user started re-watching the show. Your app can adjust the progress by ignoring episodes with a `last_watched_at` prior to the `reset_at`.
          */
-        get: operations["Get watched"];
+        get: operations["Get watched (2)"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6171,7 +6171,7 @@ export interface operations {
             };
         };
     };
-    "Get shows": {
+    "Get shows (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6341,7 +6341,7 @@ export interface operations {
             };
         };
     };
-    "Get new shows": {
+    "Get new shows (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6436,7 +6436,7 @@ export interface operations {
             };
         };
     };
-    "Get season premieres": {
+    "Get season premieres (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6556,7 +6556,7 @@ export interface operations {
             };
         };
     };
-    "Get finales": {
+    "Get finales (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6676,7 +6676,7 @@ export interface operations {
             };
         };
     };
-    "Get movies": {
+    "Get movies (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6773,7 +6773,7 @@ export interface operations {
             };
         };
     };
-    "Get streaming releases": {
+    "Get streaming releases (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -6870,7 +6870,7 @@ export interface operations {
             };
         };
     };
-    "Get DVD releases": {
+    "Get DVD releases (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -18562,7 +18562,7 @@ export interface operations {
             };
         };
     };
-    "Get users watching right now": {
+    "Get users watching right now (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -18746,7 +18746,7 @@ export interface operations {
             };
         };
     };
-    "Get all videos": {
+    "Get all videos (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -19835,7 +19835,7 @@ export interface operations {
             };
         };
     };
-    "Get users watching right now": {
+    "Get users watching right now (3)": {
         parameters: {
             query?: never;
             header?: {
@@ -19908,7 +19908,7 @@ export interface operations {
             };
         };
     };
-    "Get all videos": {
+    "Get all videos (3)": {
         parameters: {
             query?: never;
             header?: {
@@ -20680,7 +20680,7 @@ export interface operations {
             };
         };
     };
-    "Get all videos": {
+    "Get all videos (4)": {
         parameters: {
             query?: never;
             header?: {
@@ -25498,7 +25498,7 @@ export interface operations {
             };
         };
     };
-    "Get collection": {
+    "Get collection (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -26804,7 +26804,7 @@ export interface operations {
             };
         };
     };
-    "Get all users who liked a list": {
+    "Get all users who liked a list (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -26891,7 +26891,7 @@ export interface operations {
             };
         };
     };
-    "Like a list": {
+    "Like a list (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -26936,7 +26936,7 @@ export interface operations {
             };
         };
     };
-    "Remove like on a list": {
+    "Remove like on a list (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -27812,7 +27812,7 @@ export interface operations {
             };
         };
     };
-    "Get all list comments": {
+    "Get all list comments (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -28255,7 +28255,7 @@ export interface operations {
             };
         };
     };
-    "Get watched history": {
+    "Get watched history (2)": {
         parameters: {
             query?: {
                 /**
@@ -28395,7 +28395,7 @@ export interface operations {
             };
         };
     };
-    "Get ratings": {
+    "Get ratings (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -28518,7 +28518,7 @@ export interface operations {
             };
         };
     };
-    "Get watchlist": {
+    "Get watchlist (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -28759,7 +28759,7 @@ export interface operations {
             };
         };
     };
-    "Get favorites": {
+    "Get favorites (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -28853,7 +28853,7 @@ export interface operations {
             };
         };
     };
-    "Get all favorites comments": {
+    "Get all favorites comments (2)": {
         parameters: {
             query?: never;
             header?: {
@@ -29038,7 +29038,7 @@ export interface operations {
             };
         };
     };
-    "Get watched": {
+    "Get watched (2)": {
         parameters: {
             query?: never;
             header?: {

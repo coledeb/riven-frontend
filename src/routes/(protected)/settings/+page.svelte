@@ -13,13 +13,26 @@
 
     let { data }: { data: PageData } = $props();
 
-    type Schema = { title?: string; description?: string; type?: unknown; properties?: Record<string, Schema> };
+    type Schema = {
+        title?: string;
+        description?: string;
+        type?: unknown;
+        properties?: Record<string, Schema>;
+    };
     type Section = { id: string; title: string; description?: string };
 
     // Top-level settings that aren't objects are grouped under "General".
     const GENERAL = "general";
     // Most-used sections first; anything else keeps the backend's order.
-    const ORDER = ["downloaders", "scraping", "ranking", "content", "updaters", "filesystem", "stream"];
+    const ORDER = [
+        "downloaders",
+        "scraping",
+        "ranking",
+        "content",
+        "updaters",
+        "filesystem",
+        "stream"
+    ];
 
     // svelte-ignore state_referenced_locally
     const schema = data.form.schema as Schema;
@@ -31,7 +44,8 @@
         ...Object.entries(properties)
             .filter(([, prop]) => isSection(prop))
             .sort(([a], [b]) => {
-                const rank = (key: string) => (ORDER.includes(key) ? ORDER.indexOf(key) : ORDER.length);
+                const rank = (key: string) =>
+                    ORDER.includes(key) ? ORDER.indexOf(key) : ORDER.length;
                 return rank(a) - rank(b);
             })
             .map(([id, prop]) => ({ id, title: prop.title ?? id, description: prop.description }))
@@ -73,7 +87,10 @@
     // One fixed rule per section, keyed on the wrapper's data-active (rewriting a single rule on
     // every change sometimes wasn't re-applied after hydration, leaving the first section blank).
     const sectionStyles = `<style>${sections
-        .map((s) => `.settings-form[data-active="${s.id}"] [data-section="${s.id}"] { display: block !important; }`)
+        .map(
+            (s) =>
+                `.settings-form[data-active="${s.id}"] [data-section="${s.id}"] { display: block !important; }`
+        )
         .join("\n")}</style>`;
 
     let active = $state(GENERAL);
@@ -149,6 +166,7 @@
             return any;
         };
 
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local scratch set, not state
         const found = new Set<string>();
         for (const top of formEl.querySelectorAll("[data-section]")) {
             if (visit(top, top.getAttribute("data-section-title") ?? "")) {
@@ -171,13 +189,15 @@
         await tick();
         setTimeout(() => {
             if (!formEl) return;
+            // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local scratch set, not state
             const found = new Set<string>();
             formEl.querySelectorAll('[data-invalid="true"]').forEach((el) => {
                 const id = el.closest("[data-section]")?.getAttribute("data-section");
                 if (id) found.add(id);
             });
             invalidSections = sections.filter((s) => found.has(s.id)).map((s) => s.id);
-            if (invalidSections.length && !invalidSections.includes(active)) select(invalidSections[0]);
+            if (invalidSections.length && !invalidSections.includes(active))
+                select(invalidSections[0]);
         }, 50);
     }
 
@@ -189,9 +209,9 @@
         uiSchema,
         // Backend can set sjsf UI options per field (e.g. addable/removable) via "x-ui-options".
         extraUiOptions: (option, config) =>
-            (config?.schema as { "x-ui-options"?: Record<string, unknown> } | undefined)?.["x-ui-options"]?.[
-                option
-            ] as never,
+            (config?.schema as { "x-ui-options"?: Record<string, unknown> } | undefined)?.[
+                "x-ui-options"
+            ]?.[option] as never,
         delayedMs: 500,
         timeoutMs: 30000,
         // sjsf's default native form reset puts every field back to its page-load value, and the
@@ -216,6 +236,7 @@
 <svelte:head>
     <title>Settings - Riven</title>
     <!-- Only the active section's fields are shown; it stays one form, so Save covers every section. -->
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- built only from our own section ids -->
     {@html sectionStyles}
 </svelte:head>
 
@@ -240,7 +261,8 @@
                             <span class:opacity-40={query && !matchedSections.includes(section.id)}
                                 >{section.title}</span>
                             {#if invalidSections.includes(section.id)}
-                                <span class="bg-destructive size-2 rounded-full" title="Has errors"></span>
+                                <span class="bg-destructive size-2 rounded-full" title="Has errors"
+                                ></span>
                             {/if}
                         </button>
                     </li>
@@ -266,7 +288,11 @@
                     {/if}
                 </div>
                 <!-- Submits the form below (`form` attribute), so it saves every section. -->
-                <Button type="submit" form="settings-form" class="shrink-0" disabled={request.isProcessed}>
+                <Button
+                    type="submit"
+                    form="settings-form"
+                    class="shrink-0"
+                    disabled={request.isProcessed}>
                     {request.isProcessed ? "Saving…" : "Save changes"}
                 </Button>
             </header>
@@ -305,9 +331,15 @@
     }
     /* Root "AppModel" title and the section's own title/description (shown in the header instead). */
     .settings-form :global(form > fieldset > legend),
-    .settings-form :global([data-section] > [data-layout="object-property-content"] > fieldset > legend),
     .settings-form
-        :global([data-section] > [data-layout="object-property-content"] > fieldset > [data-slot="field-description"]) {
+        :global([data-section] > [data-layout="object-property-content"] > fieldset > legend),
+    .settings-form
+        :global(
+            [data-section]
+                > [data-layout="object-property-content"]
+                > fieldset
+                > [data-slot="field-description"]
+        ) {
         display: none;
     }
 
@@ -363,10 +395,18 @@
         column-gap: 1.5rem;
         row-gap: 0.5rem;
     }
-    .settings-form :global([data-layout="field"]:has(> div > [data-slot="checkbox"]) > :is([data-layout="field-title-row"], [data-slot="field-description"], ul)) {
+    .settings-form
+        :global(
+            [data-layout="field"]:has(> div > [data-slot="checkbox"])
+                > :is([data-layout="field-title-row"], [data-slot="field-description"], ul)
+        ) {
         width: 100%;
     }
-    .settings-form :global([data-layout="field"]:has(> div > [data-slot="checkbox"]) > div:has(> [data-slot="checkbox"])) {
+    .settings-form
+        :global(
+            [data-layout="field"]:has(> div > [data-slot="checkbox"])
+                > div:has(> [data-slot="checkbox"])
+        ) {
         width: 6.5rem;
     }
 
@@ -375,7 +415,16 @@
     .settings-form :global(fieldset[data-layout="object-field"]) {
         gap: 0.25rem;
     }
-    .settings-form :global([data-section] > * > fieldset > [data-layout="object-properties"] > * > * > fieldset[data-layout="object-field"]) {
+    .settings-form
+        :global(
+            [data-section]
+                > *
+                > fieldset
+                > [data-layout="object-properties"]
+                > *
+                > *
+                > fieldset[data-layout="object-field"]
+        ) {
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--card);
@@ -401,7 +450,13 @@
     }
     /* Thin divider between setting rows. */
     .settings-form
-        :global([data-layout="object-property"]:not([data-section]) + [data-layout="object-property"]:not([data-section], :has(> * > fieldset[data-layout="object-field"]))) {
+        :global(
+            [data-layout="object-property"]:not([data-section])
+                + [data-layout="object-property"]:not(
+                    [data-section],
+                    :has(> * > fieldset[data-layout="object-field"])
+                )
+        ) {
         border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
     }
     .settings-form :global([data-section="general"] + [data-section="general"]) {
@@ -452,7 +507,10 @@
         display: block;
         padding: 0;
     }
-    .settings-form :global([data-layout="array-item"] [data-layout="field"] > [data-layout="field-title-row"]) {
+    .settings-form
+        :global(
+            [data-layout="array-item"] [data-layout="field"] > [data-layout="field-title-row"]
+        ) {
         display: none;
     }
     .settings-form :global([data-layout="array-item"] > [data-layout="array-item-content"]) {
@@ -461,38 +519,72 @@
     }
 
     /* Named entries (e.g. library profiles): name on top, settings underneath, remove button top right. */
-    .settings-form :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"])) {
+    .settings-form
+        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"])) {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 0.5rem;
         align-items: start;
     }
-    .settings-form :global([data-layout="object-property"] > [data-layout="object-property-content"]) {
+    .settings-form
+        :global([data-layout="object-property"] > [data-layout="object-property-content"]) {
         grid-column: 1 / -1;
     }
     .settings-form
-        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset > :is(legend, [data-slot="field-description"])) {
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                > [data-layout="object-property-content"]
+                > fieldset
+                > :is(legend, [data-slot="field-description"])
+        ) {
         display: none;
     }
 
     /* Simple name → value maps (e.g. Plex path mappings): one row of [name] [value] [delete]. */
     .settings-form
-        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"])) {
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(
+                    > [data-layout="object-property-content"] > [data-layout="field"]
+                )
+        ) {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
         align-items: center;
         margin-bottom: 0.5rem;
     }
     .settings-form
-        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > [data-layout="object-property-content"]) {
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(
+                    > [data-layout="object-property-content"] > [data-layout="field"]
+                )
+                > [data-layout="object-property-content"]
+        ) {
         grid-column: auto;
     }
     .settings-form
-        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > :is([data-layout="object-property-key-input"], [data-layout="object-property-content"]) [data-layout="field"]) {
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(
+                    > [data-layout="object-property-content"] > [data-layout="field"]
+                )
+                > :is(
+                    [data-layout="object-property-key-input"],
+                    [data-layout="object-property-content"]
+                )
+                [data-layout="field"]
+        ) {
         display: block;
         padding: 0;
     }
     .settings-form
-        :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(> [data-layout="object-property-content"] > [data-layout="field"]) > :is([data-layout="object-property-key-input"], [data-layout="object-property-content"]) [data-layout="field-title-row"]) {
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"]):has(
+                    > [data-layout="object-property-content"] > [data-layout="field"]
+                )
+                > :is(
+                    [data-layout="object-property-key-input"],
+                    [data-layout="object-property-content"]
+                )
+                [data-layout="field-title-row"]
+        ) {
         display: none;
     }
     .settings-form :global(fieldset[data-layout="object-field"] > button) {
@@ -516,7 +608,28 @@
     /* A disabled service (Enabled off) or a custom rank that isn't fetched (Fetch off) collapses to
        its title, description and that switch. */
     .settings-form
-        :global(fieldset:has(> [data-layout="object-properties"] > [data-layout="object-property"] > [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"]:is([id$=".enabled"], [id$=".fetch"])[aria-checked="false"]) > [data-layout="object-properties"] > [data-layout="object-property"]:not(:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"]:is([id$=".enabled"], [id$=".fetch"])))) {
+        :global(
+            fieldset:has(
+                    > [data-layout="object-properties"]
+                        > [data-layout="object-property"]
+                        > [data-layout="object-property-content"]
+                        > [data-layout="field"]
+                        > div
+                        > [data-slot="switch"]:is(
+                            [id$=".enabled"],
+                            [id$=".fetch"]
+                        )[aria-checked="false"]
+                )
+                > [data-layout="object-properties"]
+                > [data-layout="object-property"]:not(
+                    :has(
+                        > [data-layout="object-property-content"]
+                            > [data-layout="field"]
+                            > div
+                            > [data-slot="switch"]:is([id$=".enabled"], [id$=".fetch"])
+                    )
+                )
+        ) {
         display: none;
     }
 
@@ -525,22 +638,88 @@
     .settings-form :global([data-section] fieldset fieldset) {
         position: relative;
     }
-    .settings-form :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
+    .settings-form
+        :global(
+            [data-section]
+                fieldset
+                fieldset:not(
+                    [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                        > [data-layout="object-property-content"]
+                        > fieldset
+                )
+                > [data-layout="object-properties"]
+                > [data-layout="object-property"]:has(
+                    > [data-layout="object-property-content"]
+                        > [data-layout="field"]
+                        > div
+                        > [data-slot="switch"][id$=".enabled"]
+                )
+        ) {
         position: absolute;
         top: 1.1rem;
         right: 1.25rem;
         border: none;
     }
     /* Sub-groups inside a card have no side padding. */
-    .settings-form :global([data-section] fieldset fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"])) {
+    .settings-form
+        :global(
+            [data-section]
+                fieldset
+                fieldset
+                fieldset:not(
+                    [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                        > [data-layout="object-property-content"]
+                        > fieldset
+                )
+                > [data-layout="object-properties"]
+                > [data-layout="object-property"]:has(
+                    > [data-layout="object-property-content"]
+                        > [data-layout="field"]
+                        > div
+                        > [data-slot="switch"][id$=".enabled"]
+                )
+        ) {
         right: 0;
     }
-    .settings-form :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) [data-layout="field"]) {
+    .settings-form
+        :global(
+            [data-section]
+                fieldset
+                fieldset:not(
+                    [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                        > [data-layout="object-property-content"]
+                        > fieldset
+                )
+                > [data-layout="object-properties"]
+                > [data-layout="object-property"]:has(
+                    > [data-layout="object-property-content"]
+                        > [data-layout="field"]
+                        > div
+                        > [data-slot="switch"][id$=".enabled"]
+                )
+                [data-layout="field"]
+        ) {
         display: block;
         padding: 0;
     }
     .settings-form
-        :global([data-section] fieldset fieldset:not([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"] > fieldset) > [data-layout="object-properties"] > [data-layout="object-property"]:has(> [data-layout="object-property-content"] > [data-layout="field"] > div > [data-slot="switch"][id$=".enabled"]) :is([data-slot="field-description"], [data-slot="field-label"])) {
+        :global(
+            [data-section]
+                fieldset
+                fieldset:not(
+                    [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                        > [data-layout="object-property-content"]
+                        > fieldset
+                )
+                > [data-layout="object-properties"]
+                > [data-layout="object-property"]:has(
+                    > [data-layout="object-property-content"]
+                        > [data-layout="field"]
+                        > div
+                        > [data-slot="switch"][id$=".enabled"]
+                )
+                :is([data-slot="field-description"], [data-slot="field-label"])
+        ) {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -550,12 +729,20 @@
     }
 
     /* Named entries: delete button on the id row. */
-    .settings-form :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-controls"]) {
+    .settings-form
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                > [data-layout="object-property-controls"]
+        ) {
         grid-column: 2;
         grid-row: 1;
         align-self: center;
     }
-    .settings-form :global([data-layout="object-property"]:has(> [data-layout="object-property-key-input"]) > [data-layout="object-property-content"]) {
+    .settings-form
+        :global(
+            [data-layout="object-property"]:has(> [data-layout="object-property-key-input"])
+                > [data-layout="object-property-content"]
+        ) {
         grid-row: 2;
     }
 </style>

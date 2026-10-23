@@ -110,6 +110,7 @@
                 <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium">
                         {#if url}
+                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- itemUrl() already calls resolve() -->
                             <a href={url} class="hover:text-primary hover:underline"
                                 >{entry.title}</a>
                         {:else}

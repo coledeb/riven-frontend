@@ -14,6 +14,12 @@ type Schema = Record<string, unknown>;
 const isObject = (value: unknown): value is Schema =>
     typeof value === "object" && value !== null && !Array.isArray(value);
 
+const omit = (node: Schema, key: string): Schema => {
+    const rest = { ...node };
+    delete rest[key];
+    return rest;
+};
+
 function collapseNullable(node: Schema): Schema {
     const anyOf = node.anyOf;
     if (!Array.isArray(anyOf) || anyOf.length !== 2) return node;
@@ -21,7 +27,7 @@ function collapseNullable(node: Schema): Schema {
     if (nonNull.length !== 1 || !isObject(nonNull[0]) || typeof nonNull[0].type !== "string") {
         return node;
     }
-    const { anyOf: _, ...rest } = node;
+    const rest = omit(node, "anyOf");
     return { ...nonNull[0], ...rest, type: [nonNull[0].type, "null"] };
 }
 
@@ -49,12 +55,15 @@ function languageLists(node: Schema): Schema {
         const items = prop.items;
         const match = typeof items.pattern === "string" ? CODE_PATTERN.exec(items.pattern) : null;
         if (!match) continue;
-        const { pattern: _, ...rest } = items;
+        const rest = omit(items, "pattern");
         prop.items = {
             ...rest,
             oneOf: match[1]
                 .split("|")
-                .map((code) => ({ const: code, title: `${languageNames.of(code) ?? code} (${code})` }))
+                .map((code) => ({
+                    const: code,
+                    title: `${languageNames.of(code) ?? code} (${code})`
+                }))
                 .sort((a, b) => a.title.localeCompare(b.title))
         };
         prop["x-language-list"] = true;
@@ -66,7 +75,7 @@ const INTERNAL_DOCSTRING = /\bSettingsModel\b/;
 
 function dropInternalDocs(node: Schema): Schema {
     if (typeof node.description === "string" && INTERNAL_DOCSTRING.test(node.description)) {
-        const { description: _, ...rest } = node;
+        const rest = omit(node, "description");
         return rest;
     }
     return node;
@@ -81,14 +90,18 @@ export function prepareSettingsSchema(schema: Schema): Schema {
 
         let current: Schema = node;
         // Pydantic wraps a ref with siblings as `allOf: [{$ref}]`.
-        if (Array.isArray(current.allOf) && current.allOf.length === 1 && isObject(current.allOf[0])) {
+        if (
+            Array.isArray(current.allOf) &&
+            current.allOf.length === 1 &&
+            isObject(current.allOf[0])
+        ) {
             const { allOf, ...rest } = current;
             current = { ...(allOf as Schema[])[0], ...rest };
         }
         if (typeof current.$ref === "string") {
             const name = current.$ref.split("/").pop()!;
             if (seen.has(name)) return current; // recursive model: leave the ref
-            const { $ref: _, ...rest } = current;
+            const rest = omit(current, "$ref");
             const target = resolve(defs[name], new Set([...seen, name])) as Schema;
             current = { ...target, ...rest };
             return dropInternalDocs(languageLists(maskSecrets(collapseNullable(current))));
