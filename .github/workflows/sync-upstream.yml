@@ -61,27 +61,31 @@ jobs:
           -f description="Checking upstream merged into main"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ inputs.check_ref || needs.sync.outputs.check_sha }}
+          ref: main
+          path: base
           persist-credentials: false
-      # Same checks as upstream's CI workflow.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.check_ref || needs.sync.outputs.check_sha }}
+          path: pr
+          persist-credentials: false
+      # Upstream's CI checks (svelte-check, prettier, eslint), counted on both sides.
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: pr/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run svelte-check
-        run: pnpm check
-      - name: Lint
-        if: ${{ !cancelled() }}
-        run: pnpm lint
+      - name: Compare errors with main
+        id: compare
+        run: python3 base/.github/scripts/compare_checks.py base pr
       - name: Report result
         if: always() && env.HEAD_SHA
         env:
           JOB_STATUS: ${{ job.status }}
+          RESULT: ${{ steps.compare.outputs.result || 'Checks did not finish' }}
         run: |
           if [ "$JOB_STATUS" = success ]; then state=success; else state=failure; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
             -f state="$state" -f context="Upstream sync checks" -f target_url="$RUN_URL" \
-            -f description="Checks on upstream merged into main: $JOB_STATUS"
+            -f description="$RESULT"
