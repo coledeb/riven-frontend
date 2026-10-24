@@ -15,11 +15,14 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { ac, admin, user, manager } from "./src/lib/server/permissions";
 import { getGenericOAuthProviders } from "./src/lib/server/oauth-utils";
 import { plexOAuth } from "./src/lib/server/plex-oauth";
-import { generateSecret } from "./src/lib/helpers";
+import { resolveAuthSecret, resolveDatabasePath } from "./src/lib/server/persistence";
 import "dotenv/config";
 
 export const auth = betterAuth({
-    secret: process.env.AUTH_SECRET || generateSecret(),
+    secret: resolveAuthSecret(
+        process.env.AUTH_SECRET,
+        resolveDatabasePath(process.env.DATABASE_URL)
+    ),
     baseURL: process.env.ORIGIN,
     database: drizzleAdapter(db, {
         provider: "sqlite"

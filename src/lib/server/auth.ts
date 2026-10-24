@@ -10,15 +10,15 @@ import { sveltekitCookies } from "better-auth/svelte-kit";
 import { getRequestEvent } from "$app/server";
 import { admin as adminPlugin, openAPI, lastLoginMethod, genericOAuth } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey";
-import { db } from "./db";
+import { db, databasePath } from "./db";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { ac, admin, user, manager } from "./permissions";
 import { getGenericOAuthProviders } from "./oauth-utils";
 import { plexOAuth } from "./plex-oauth";
-import { generateSecret } from "$lib/helpers";
+import { resolveAuthSecret } from "./persistence";
 
 export const auth = betterAuth({
-    secret: env.AUTH_SECRET || generateSecret(),
+    secret: resolveAuthSecret(env.AUTH_SECRET, databasePath),
     baseURL: env.ORIGIN,
     database: drizzleAdapter(db, {
         provider: "sqlite"

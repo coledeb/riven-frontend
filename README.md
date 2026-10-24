@@ -85,6 +85,8 @@ It will start the frontend on port `3000`.
 
 Refer to the [`.env.example`](./.env.example) file for the list of environment variables required to run the frontend.
 
+`DATABASE_URL` and `AUTH_SECRET` have defaults: without `DATABASE_URL` the database is `data/riven.db` under the working directory, and without `AUTH_SECRET` a secret is generated once and saved as `auth-secret` next to the database. Set `DATABASE_URL` to a path outside the app folder if your updates replace that folder.
+
 ---
 
 ### Developing
