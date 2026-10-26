@@ -18,7 +18,7 @@
     import ListChecks from "@lucide/svelte/icons/list-checks";
     import * as Select from "$lib/components/ui/select/index.js";
     import { ItemStore } from "$lib/stores/library-items.svelte";
-    import { reset_items, retry_items, remove_items } from "./library.remote";
+    import { replace_items, retry_items, remove_items } from "./library.remote";
     import * as Pagination from "$lib/components/ui/pagination/index.js";
     import Loading2Circle from "@lucide/svelte/icons/loader-2";
     import { toast } from "svelte-sonner";
@@ -330,11 +330,13 @@
                     {/snippet}
 
                     <!-- Actions -->
-                    {@render actionButton("Reset", { component: ListChecks }, async () => {
+                    {@render actionButton("Replace", { component: ListChecks }, async () => {
                         actionInProgress = true;
                         try {
-                            await reset_items({ ids: itemsStore.items.map((id) => id.toString()) });
-                            toast.success(`Reset ${itemsStore.count} items`);
+                            await replace_items({
+                                ids: itemsStore.items.map((id) => id.toString())
+                            });
+                            toast.success(`Finding another copy for ${itemsStore.count} items`);
                             itemsStore.clear();
                             await invalidateAll();
                         } catch (e) {

@@ -13,7 +13,6 @@
     import * as Drawer from "$lib/components/ui/drawer/index.js";
     import Play from "@lucide/svelte/icons/play";
     import FileJson from "@lucide/svelte/icons/file-json";
-    import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
     import RefreshCw from "@lucide/svelte/icons/refresh-cw";
     import Trash2 from "@lucide/svelte/icons/trash-2";
     import Search from "@lucide/svelte/icons/search";
@@ -27,7 +26,6 @@
     import ItemRequest from "$lib/components/media/riven/item-request.svelte";
     import ItemDelete from "$lib/components/media/riven/item-delete.svelte";
     import ItemPause from "$lib/components/media/riven/item-pause.svelte";
-    import ItemReset from "$lib/components/media/riven/item-reset.svelte";
     import ItemBlacklist from "$lib/components/media/riven/item-blacklist.svelte";
     import ItemRetry from "$lib/components/media/riven/item-retry.svelte";
     import ItemReplace from "$lib/components/media/riven/item-replace.svelte";
@@ -270,15 +268,6 @@
             <RefreshCw class="mr-1.5 h-4 w-4" />
             Retry
         </ItemRetry>
-        <ItemReset
-            size="sm"
-            variant="secondary"
-            class={cls}
-            {title}
-            ids={[rivenItem.id.toString()]}>
-            <RotateCcw class="mr-1.5 h-4 w-4" />
-            Reset
-        </ItemReset>
         <ItemBlacklist size="sm" variant="secondary" class={cls} {title} itemId={rivenItem.id}>
             <Ban class="mr-1.5 h-4 w-4" />
             Blacklist
@@ -590,15 +579,6 @@
                                     Manual Scrape
                                 </ItemManualScrape>
                             {:else if data.riven?.id != null}
-                                <ItemReset
-                                    size="default"
-                                    variant="secondary"
-                                    class="border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-4"
-                                    title={data.mediaDetails?.details.title}
-                                    ids={rivenId ? [rivenId.toString()] : []}>
-                                    <RotateCcw class="mr-1.5 h-4 w-4" />
-                                    Reset
-                                </ItemReset>
                                 <ItemRetry
                                     size="default"
                                     variant="secondary"

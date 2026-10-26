@@ -7,7 +7,7 @@ const itemIdsSchema = z.object({
     ids: z.array(z.string())
 });
 
-export const reset_items = command(itemIdsSchema, async ({ ids }) => {
+export const replace_items = command(itemIdsSchema, async ({ ids }) => {
     const event = getRequestEvent();
     if (!event) throw new Error("No event found");
 
@@ -18,7 +18,7 @@ export const reset_items = command(itemIdsSchema, async ({ ids }) => {
         throw new Error("Backend URL or API key missing");
     }
 
-    const res = await providers.riven.POST("/api/v1/items/reset", {
+    const res = await providers.riven.POST("/api/v1/items/replace", {
         body: { ids },
         baseUrl: backendUrl,
         headers: {

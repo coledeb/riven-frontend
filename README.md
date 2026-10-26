@@ -34,7 +34,7 @@ This repository contains the frontend for Riven. It is build with [SvelteKit](ht
 > - **Validation errors are easy to find.** Save jumps to the section with the error and flags it.
 > - **Readable field descriptions.** Line breaks and **bold** in the backend's descriptions are shown.
 > - **Blacklist dialog on media pages.** Lists the torrents Riven won't use for an item, with why, when it expires and strikes, and an Unblacklist button. Needs the backend fork.
-> - **Replace button and season/episode actions.** Replace finds another copy of a movie, show, season or episode, keeping the current file until the new one is in place. Seasons get an action row (Replace, Retry, Reset, Blacklist) above their episodes, and the episode panel has the same buttons. Replace needs the backend fork.
+> - **Replace button and season/episode actions.** Replace finds another copy of a movie, show, season or episode, keeping the current file until the new one is in place. Seasons get an action row (Replace, Retry, Blacklist) above their episodes, and the episode panel has the same buttons. Reset is gone from media pages (it deleted the file before a new one was found), and the library page's bulk Reset is now bulk Replace. Replace needs the backend fork.
 > - **Blacklist tab in Logs.** Every blacklisting library-wide as it happens, with the same details. Needs the backend fork.
 > - **Live item progress.** Status badges on media pages update as Riven works on an item (Scraping, Downloading...).
 > - **A TVDB outage no longer breaks every page.** One shared TVDB login with a retry pause, instead of a 500 on every request.
