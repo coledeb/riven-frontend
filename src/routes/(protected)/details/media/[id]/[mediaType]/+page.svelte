@@ -20,6 +20,7 @@
     import Ban from "@lucide/svelte/icons/ban";
     import Pause from "@lucide/svelte/icons/pause";
     import Download from "@lucide/svelte/icons/download";
+    import Replace from "@lucide/svelte/icons/replace";
     import { cn } from "$lib/utils";
     import { IsMobile } from "$lib/hooks/is-mobile.svelte";
     import PortraitCard from "$lib/components/media/portrait-card.svelte";
@@ -29,6 +30,7 @@
     import ItemReset from "$lib/components/media/riven/item-reset.svelte";
     import ItemBlacklist from "$lib/components/media/riven/item-blacklist.svelte";
     import ItemRetry from "$lib/components/media/riven/item-retry.svelte";
+    import ItemReplace from "$lib/components/media/riven/item-replace.svelte";
     import ItemManualScrape from "$lib/components/media/riven/item-manual-scrape.svelte";
     import CollectionSheet from "$lib/components/media/collection-sheet.svelte";
     import LandscapeCard from "$lib/components/media/landscape-card.svelte";
@@ -87,6 +89,9 @@
     }
 
     let selectedSeason: string | undefined = $state(getInitialSeason());
+    const selectedRivenSeason = $derived(
+        data.riven?.seasons?.find((s) => s.season_number === Number(selectedSeason))
+    );
 
     $effect(() => {
         // Track ID changes to reset selected season
@@ -243,6 +248,44 @@
     </LandscapeCard>
 {/snippet}
 
+{#snippet itemActions(rivenItem: any, title: string)}
+    {@const cls =
+        "border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-3"}
+    <div class="flex flex-wrap items-center gap-2">
+        <ItemReplace
+            size="sm"
+            variant="secondary"
+            class={cls}
+            {title}
+            ids={[rivenItem.id.toString()]}>
+            <Replace class="mr-1.5 h-4 w-4" />
+            Replace
+        </ItemReplace>
+        <ItemRetry
+            size="sm"
+            variant="secondary"
+            class={cls}
+            {title}
+            ids={[rivenItem.id.toString()]}>
+            <RefreshCw class="mr-1.5 h-4 w-4" />
+            Retry
+        </ItemRetry>
+        <ItemReset
+            size="sm"
+            variant="secondary"
+            class={cls}
+            {title}
+            ids={[rivenItem.id.toString()]}>
+            <RotateCcw class="mr-1.5 h-4 w-4" />
+            Reset
+        </ItemReset>
+        <ItemBlacklist size="sm" variant="secondary" class={cls} {title} itemId={rivenItem.id}>
+            <Ban class="mr-1.5 h-4 w-4" />
+            Blacklist
+        </ItemBlacklist>
+    </div>
+{/snippet}
+
 {#snippet episodeMetadata(episode: any, rivenEpisode: any)}
     <div class="mt-2 flex flex-wrap items-center gap-2">
         <span class="text-muted-foreground font-serif text-sm"
@@ -258,6 +301,14 @@
                 state={rivenEpisode.state}
                 itemId={rivenEpisode.id} />{/if}
     </div>
+    {#if rivenEpisode?.id != null}
+        <div class="mt-4">
+            {@render itemActions(
+                rivenEpisode,
+                `${data.mediaDetails?.details.title} S${episode.seasonNumber}E${episode.number}`
+            )}
+        </div>
+    {/if}
 {/snippet}
 
 {#snippet episodeBody(episode: any, rivenEpisode: any)}
@@ -557,6 +608,15 @@
                                     <RefreshCw class="mr-1.5 h-4 w-4" />
                                     Retry
                                 </ItemRetry>
+                                <ItemReplace
+                                    size="default"
+                                    variant="secondary"
+                                    class="border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-4"
+                                    title={data.mediaDetails?.details.title}
+                                    ids={rivenId ? [rivenId.toString()] : []}>
+                                    <Replace class="mr-1.5 h-4 w-4" />
+                                    Replace
+                                </ItemReplace>
 
                                 {#if data.mediaDetails?.type === "tv"}
                                     <ItemRequest
@@ -828,6 +888,18 @@
                         class="mt-8 md:mt-12"
                         in:fly|global={{ y: 20, duration: 400, delay: 500, easing: cubicOut }}>
                         {@render sectionHeading("Episodes")}
+                        {#if selectedRivenSeason?.id != null}
+                            <div class="mb-4 flex flex-wrap items-center gap-3">
+                                <span class="text-muted-foreground text-sm"
+                                    >{selectedSeason === "0"
+                                        ? "Specials"
+                                        : `Season ${selectedSeason}`}:</span>
+                                {@render itemActions(
+                                    selectedRivenSeason,
+                                    `${data.mediaDetails?.details.title} ${selectedSeason === "0" ? "Specials" : `Season ${selectedSeason}`}`
+                                )}
+                            </div>
+                        {/if}
                         <div
                             class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:grid-cols-4">
                             {#each data.mediaDetails?.details.episodes.filter((ep) => ep.seasonNumber?.toString() === selectedSeason) as episode (episode.id)}
