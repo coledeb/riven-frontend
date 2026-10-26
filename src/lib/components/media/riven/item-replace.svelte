@@ -38,7 +38,7 @@
         });
 
         if (response.data) {
-            toast.success("Finding another copy. The current file stays until it's replaced.");
+            toast.success("Finding another copy.");
             await invalidateAll();
         } else {
             logger.error("Error response:", response.error);
@@ -68,8 +68,9 @@
                 Replace "{title ?? "Media Item"}"?
             </AlertDialog.Title>
             <AlertDialog.Description>
-                Riven blacklists the current source and finds another copy. The current file stays
-                playable until the new one is in place. For a season or show, every episode is
+                Riven blacklists the current source and finds another copy. The file stays in Plex
+                but can't be played until the new copy is in place (usually a minute or two); anyone
+                watching it is stopped with a message. For a season or show, every episode is
                 replaced.
             </AlertDialog.Description>
         </AlertDialog.Header>
